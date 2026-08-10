@@ -22,8 +22,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       password: event.password,
     );
     result.fold(
-      (failure) =>
-          emit(state.copyWith(status: AuthStatus.failure, failure: failure)),
+      (failure) => emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          user: null,
+          failure: failure,
+        ),
+      ),
       (user) => emit(state.copyWith(status: AuthStatus.success, user: user)),
     );
   }
@@ -32,7 +37,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SignOutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    await _authRepository.signOut();
-    emit(const AuthState());
+    final result = await _authRepository.signOut();
+    result.fold(
+      (failure) =>
+          emit(state.copyWith(status: AuthStatus.failure, failure: failure)),
+      (_) => emit(const AuthState()),
+    );
   }
 }

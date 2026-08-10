@@ -54,7 +54,7 @@ out of version control — a lot of standing risk for a one-off seeding
 script. Reusing the CLI's own already-granted OAuth login instead means: no
 new credential file is created, the access token is scoped
 (`cloud-platform`) and short-lived, and it's limited to whatever the signed-in
-account (`jordannnabugwu@gmail.com`) can already do — the same trust level
+account (the developer's own `firebase login` account) can already do — the same trust level
 already implicitly granted by having `firebase deploy` work on this machine.
 
 **How it works:** `firebase-tools` is installed locally into `scripts/`

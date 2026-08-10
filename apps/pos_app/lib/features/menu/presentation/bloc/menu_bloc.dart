@@ -32,16 +32,49 @@ class MenuBloc extends Bloc<MenuEvent, MenuState> {
     ToggleAvailability event,
     Emitter<MenuState> emit,
   ) async {
-    MenuItem? item;
-    for (final candidate in state.items) {
-      if (candidate.id == event.itemId) {
-        item = candidate;
-        break;
-      }
-    }
+    final item = _findItem(state.items, event.itemId);
     if (item == null) return;
-    // No optimistic local update: the live watchMenu() stream above pushes
-    // the confirmed state moments later (Firestore's realtime propagation).
-    await _menuRepository.setAvailability(item.id, !item.available);
+
+    final target = !item.available;
+    // Optimistically apply the target locally (and drop any stale failure
+    // from a previous attempt) so a rapid second tap on the same item reads
+    // the pending target instead of the last confirmed watchMenu() snapshot
+    // — otherwise both taps compute the same !available and the second is
+    // a no-op. The live stream reconciles this with the confirmed value
+    // moments later.
+    emit(
+      state.copyWith(items: _withAvailability(state.items, item.id, target)),
+    );
+
+    final result = await _menuRepository.setAvailability(item.id, target);
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          // Roll back: the write failed, so no new watchMenu() snapshot
+          // will arrive to correct the optimistic value.
+          items: _withAvailability(state.items, item.id, item.available),
+          failure: failure,
+        ),
+      ),
+      (_) {},
+    );
+  }
+
+  MenuItem? _findItem(List<MenuItem> items, String id) {
+    for (final item in items) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
+
+  List<MenuItem> _withAvailability(
+    List<MenuItem> items,
+    String id,
+    bool available,
+  ) {
+    return [
+      for (final item in items)
+        if (item.id == id) item.copyWith(available: available) else item,
+    ];
   }
 }

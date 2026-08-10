@@ -52,33 +52,52 @@ class MenuPage extends StatelessWidget {
 
           final grouped = _groupByCategory(state.items);
           final categories = grouped.keys.toList();
+          final isAdmin =
+              context.watch<AuthBloc>().state.user?.role == core.AppRole.admin;
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              final items = grouped[category]!;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(category).h4,
-                  const Gap(8),
-                  ...items.map(
-                    (item) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: MenuItemTile(
-                        item: item,
-                        onToggle: () => context.read<MenuBloc>().add(
-                          ToggleAvailability(item.id),
-                        ),
-                      ),
+          return Column(
+            children: [
+              if (state.failure != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: Text(
+                    state.failure!.message,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.destructive,
                     ),
-                  ),
-                  const Gap(16),
-                ],
-              );
-            },
+                  ).textSmall,
+                ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final category = categories[index];
+                    final items = grouped[category]!;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(category).h4,
+                        const Gap(8),
+                        ...items.map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: MenuItemTile(
+                              item: item,
+                              enabled: isAdmin,
+                              onToggle: () => context.read<MenuBloc>().add(
+                                ToggleAvailability(item.id),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Gap(16),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),

@@ -16,6 +16,8 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  String? _validationError;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -24,11 +26,17 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _submit() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _validationError = 'Enter both email and password.');
+      return;
+    }
+
+    setState(() => _validationError = null);
     context.read<AuthBloc>().add(
-      SignInRequested(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      ),
+      SignInRequested(email: email, password: password),
     );
   }
 
@@ -65,10 +73,13 @@ class _LoginPageState extends State<LoginPage> {
                       enabled: !loading,
                       onSubmitted: (_) => loading ? null : _submit(),
                     ),
-                    if (state.status == AuthStatus.failure) ...[
+                    if (_validationError != null ||
+                        state.status == AuthStatus.failure) ...[
                       const Gap(12),
                       Text(
-                        state.failure?.message ?? 'Sign in failed.',
+                        _validationError ??
+                            state.failure?.message ??
+                            'Sign in failed.',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.destructive,
                         ),

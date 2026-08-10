@@ -101,5 +101,51 @@ void main() {
       act: (bloc) => bloc.add(const SignOutRequested()),
       expect: () => [const AuthState()],
     );
+
+    blocTest<AuthBloc, AuthState>(
+      'keeps the current user and surfaces a failure when sign-out fails',
+      setUp: () {
+        when(
+          () => authRepository.signOut(),
+        ).thenAnswer((_) async => const Left(UnknownFailure('Network error.')));
+      },
+      build: () => AuthBloc(authRepository),
+      seed: () => const AuthState(status: AuthStatus.success, user: user),
+      act: (bloc) => bloc.add(const SignOutRequested()),
+      expect: () => [
+        const AuthState(
+          status: AuthStatus.failure,
+          user: user,
+          failure: UnknownFailure('Network error.'),
+        ),
+      ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'clears a stale user when sign-in fails',
+      setUp: () {
+        when(
+          () => authRepository.signIn(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer(
+          (_) async =>
+              const Left(InvalidCredentialsFailure('Bad credentials.')),
+        );
+      },
+      build: () => AuthBloc(authRepository),
+      seed: () => const AuthState(status: AuthStatus.success, user: user),
+      act: (bloc) => bloc.add(
+        const SignInRequested(email: 'staff@pos.test', password: 'wrong'),
+      ),
+      expect: () => [
+        const AuthState(status: AuthStatus.loading, user: user),
+        const AuthState(
+          status: AuthStatus.failure,
+          failure: InvalidCredentialsFailure('Bad credentials.'),
+        ),
+      ],
+    );
   });
 }

@@ -21,11 +21,12 @@ void registerCoreDependencies(
   FirebaseFirestore? firestore,
   fb_auth.FirebaseAuth? auth,
 }) {
-  final firestoreInstance = firestore ?? FirebaseFirestore.instance;
-  final authInstance = auth ?? fb_auth.FirebaseAuth.instance;
-
-  it.registerLazySingleton<FirebaseFirestore>(() => firestoreInstance);
-  it.registerLazySingleton<fb_auth.FirebaseAuth>(() => authInstance);
+  it.registerLazySingleton<FirebaseFirestore>(
+    () => firestore ?? FirebaseFirestore.instance,
+  );
+  it.registerLazySingleton<fb_auth.FirebaseAuth>(
+    () => auth ?? fb_auth.FirebaseAuth.instance,
+  );
 
   it.registerLazySingleton<MenuRepository>(
     () => FirestoreMenuDataSource(it<FirebaseFirestore>()),

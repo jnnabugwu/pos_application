@@ -44,21 +44,22 @@ void main() {
     );
 
     blocTest<MenuBloc, MenuState>(
-      'ToggleAvailability calls setAvailability with the flipped value',
+      'ToggleAvailability optimistically flips the item and calls '
+      'setAvailability with the flipped value',
       setUp: () {
-        when(
-          () => menuRepository.watchMenu(),
-        ).thenAnswer((_) => Stream.value([item]));
         when(
           () => menuRepository.setAvailability(any(), any()),
         ).thenAnswer((_) async => const Right(unit));
       },
       build: () => MenuBloc(menuRepository),
-      act: (bloc) async {
-        bloc.add(const WatchMenuStarted());
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const ToggleAvailability('item1'));
-      },
+      seed: () => MenuState(status: MenuStatus.success, items: [item]),
+      act: (bloc) => bloc.add(const ToggleAvailability('item1')),
+      expect: () => [
+        MenuState(
+          status: MenuStatus.success,
+          items: [item.copyWith(available: false)],
+        ),
+      ],
       verify: (_) {
         verify(() => menuRepository.setAvailability('item1', false)).called(1);
       },
@@ -66,19 +67,66 @@ void main() {
 
     blocTest<MenuBloc, MenuState>(
       'ToggleAvailability is a no-op for an unknown item id',
-      setUp: () {
-        when(
-          () => menuRepository.watchMenu(),
-        ).thenAnswer((_) => Stream.value([item]));
-      },
       build: () => MenuBloc(menuRepository),
-      act: (bloc) async {
-        bloc.add(const WatchMenuStarted());
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const ToggleAvailability('does-not-exist'));
-      },
+      seed: () => MenuState(status: MenuStatus.success, items: [item]),
+      act: (bloc) => bloc.add(const ToggleAvailability('does-not-exist')),
+      expect: () => <MenuState>[],
       verify: (_) {
         verifyNever(() => menuRepository.setAvailability(any(), any()));
+      },
+    );
+
+    blocTest<MenuBloc, MenuState>(
+      'rolls back the optimistic update and surfaces a failure when '
+      'setAvailability fails',
+      setUp: () {
+        when(
+          () => menuRepository.setAvailability(any(), any()),
+        ).thenAnswer((_) async => const Left(PermissionFailure()));
+      },
+      build: () => MenuBloc(menuRepository),
+      seed: () => MenuState(status: MenuStatus.success, items: [item]),
+      act: (bloc) => bloc.add(const ToggleAvailability('item1')),
+      expect: () => [
+        MenuState(
+          status: MenuStatus.success,
+          items: [item.copyWith(available: false)],
+        ),
+        MenuState(
+          status: MenuStatus.success,
+          items: [item],
+          failure: const PermissionFailure(),
+        ),
+      ],
+    );
+
+    blocTest<MenuBloc, MenuState>(
+      'a second rapid tap flips from the pending optimistic value, not '
+      'the stale confirmed one',
+      setUp: () {
+        when(
+          () => menuRepository.setAvailability(any(), any()),
+        ).thenAnswer((_) async => const Right(unit));
+      },
+      build: () => MenuBloc(menuRepository),
+      seed: () => MenuState(status: MenuStatus.success, items: [item]),
+      act: (bloc) {
+        bloc.add(const ToggleAvailability('item1'));
+        bloc.add(const ToggleAvailability('item1'));
+      },
+      expect: () => [
+        MenuState(
+          status: MenuStatus.success,
+          items: [item.copyWith(available: false)],
+        ),
+        MenuState(
+          status: MenuStatus.success,
+          items: [item.copyWith(available: true)],
+        ),
+      ],
+      verify: (_) {
+        verify(() => menuRepository.setAvailability('item1', false)).called(1);
+        verify(() => menuRepository.setAvailability('item1', true)).called(1);
       },
     );
   });

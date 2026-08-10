@@ -27,7 +27,10 @@ String? resolveRedirect({
 
 GoRouter buildRouter(AuthListenable authListenable) {
   return GoRouter(
-    initialLocation: AppRoutes.menu(),
+    // Start on /login, not /menu: until AuthListenable.ready flips true the
+    // redirect below is a no-op, so landing on /menu would build MenuPage
+    // and fire a Firestore read before we know whether anyone is signed in.
+    initialLocation: AppRoutes.login(),
     refreshListenable: authListenable,
     redirect: (context, state) => resolveRedirect(
       isReady: authListenable.ready,
