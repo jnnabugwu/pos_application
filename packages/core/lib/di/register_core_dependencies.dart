@@ -31,6 +31,9 @@ void registerCoreDependencies(
     () => FirestoreMenuDataSource(it<FirebaseFirestore>()),
   );
   it.registerLazySingleton<AuthRepository>(
-    () => FirebaseAuthDataSource(it<fb_auth.FirebaseAuth>(), it<FirebaseFirestore>()),
+    () => FirebaseAuthDataSource(
+      it<fb_auth.FirebaseAuth>(),
+      it<FirebaseFirestore>(),
+    ),
   );
 }

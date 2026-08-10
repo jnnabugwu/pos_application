@@ -69,9 +69,9 @@ class MenuPage extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: MenuItemTile(
                         item: item,
-                        onToggle: () => context
-                            .read<MenuBloc>()
-                            .add(ToggleAvailability(item.id)),
+                        onToggle: () => context.read<MenuBloc>().add(
+                          ToggleAvailability(item.id),
+                        ),
                       ),
                     ),
                   ),

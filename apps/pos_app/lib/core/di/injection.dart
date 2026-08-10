@@ -22,7 +22,9 @@ void configureDependencies() {
 
   // App-level singleton: shared by LoginPage (sign-in) and MenuPage's
   // sign-out action, so it outlives any single screen.
-  getIt.registerLazySingleton<AuthBloc>(() => AuthBloc(getIt<AuthRepository>()));
+  getIt.registerLazySingleton<AuthBloc>(
+    () => AuthBloc(getIt<AuthRepository>()),
+  );
 
   // Factory: fresh instance (and fresh watchMenu() subscription) each time
   // /menu is entered; disposed by BlocProvider when the route is left.

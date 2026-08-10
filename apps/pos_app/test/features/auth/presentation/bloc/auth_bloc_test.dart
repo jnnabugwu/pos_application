@@ -48,7 +48,8 @@ void main() {
             password: any(named: 'password'),
           ),
         ).thenAnswer(
-          (_) async => const Left(InvalidCredentialsFailure('Bad credentials.')),
+          (_) async =>
+              const Left(InvalidCredentialsFailure('Bad credentials.')),
         );
       },
       build: () => AuthBloc(authRepository),
@@ -91,7 +92,9 @@ void main() {
     blocTest<AuthBloc, AuthState>(
       'resets to initial state on sign-out',
       setUp: () {
-        when(() => authRepository.signOut()).thenAnswer((_) async => const Right(unit));
+        when(
+          () => authRepository.signOut(),
+        ).thenAnswer((_) async => const Right(unit));
       },
       build: () => AuthBloc(authRepository),
       seed: () => const AuthState(status: AuthStatus.success, user: user),

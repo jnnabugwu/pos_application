@@ -16,7 +16,10 @@ void main() {
 
     await tester.pumpWidget(
       ShadcnApp(
-        home: BlocProvider<AuthBloc>.value(value: bloc, child: const LoginPage()),
+        home: BlocProvider<AuthBloc>.value(
+          value: bloc,
+          child: const LoginPage(),
+        ),
       ),
     );
 

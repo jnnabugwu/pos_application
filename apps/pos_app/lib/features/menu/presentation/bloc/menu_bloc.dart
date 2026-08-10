@@ -19,7 +19,8 @@ class MenuBloc extends Bloc<MenuEvent, MenuState> {
     emit(state.copyWith(status: MenuStatus.loading));
     await emit.forEach<List<MenuItem>>(
       _menuRepository.watchMenu(),
-      onData: (items) => state.copyWith(status: MenuStatus.success, items: items),
+      onData: (items) =>
+          state.copyWith(status: MenuStatus.success, items: items),
       onError: (error, stackTrace) => state.copyWith(
         status: MenuStatus.failure,
         failure: UnknownFailure(error.toString()),

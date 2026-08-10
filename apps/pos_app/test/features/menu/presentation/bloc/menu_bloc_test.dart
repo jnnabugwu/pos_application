@@ -31,9 +31,9 @@ void main() {
     blocTest<MenuBloc, MenuState>(
       'emits loading then success with items from watchMenu()',
       setUp: () {
-        when(() => menuRepository.watchMenu()).thenAnswer(
-          (_) => Stream.value([item]),
-        );
+        when(
+          () => menuRepository.watchMenu(),
+        ).thenAnswer((_) => Stream.value([item]));
       },
       build: () => MenuBloc(menuRepository),
       act: (bloc) => bloc.add(const WatchMenuStarted()),
@@ -46,9 +46,9 @@ void main() {
     blocTest<MenuBloc, MenuState>(
       'ToggleAvailability calls setAvailability with the flipped value',
       setUp: () {
-        when(() => menuRepository.watchMenu()).thenAnswer(
-          (_) => Stream.value([item]),
-        );
+        when(
+          () => menuRepository.watchMenu(),
+        ).thenAnswer((_) => Stream.value([item]));
         when(
           () => menuRepository.setAvailability(any(), any()),
         ).thenAnswer((_) async => const Right(unit));
@@ -67,9 +67,9 @@ void main() {
     blocTest<MenuBloc, MenuState>(
       'ToggleAvailability is a no-op for an unknown item id',
       setUp: () {
-        when(() => menuRepository.watchMenu()).thenAnswer(
-          (_) => Stream.value([item]),
-        );
+        when(
+          () => menuRepository.watchMenu(),
+        ).thenAnswer((_) => Stream.value([item]));
       },
       build: () => MenuBloc(menuRepository),
       act: (bloc) async {

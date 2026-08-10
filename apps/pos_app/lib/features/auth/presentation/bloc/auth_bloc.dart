@@ -22,9 +22,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       password: event.password,
     );
     result.fold(
-      (failure) => emit(
-        state.copyWith(status: AuthStatus.failure, failure: failure),
-      ),
+      (failure) =>
+          emit(state.copyWith(status: AuthStatus.failure, failure: failure)),
       (user) => emit(state.copyWith(status: AuthStatus.success, user: user)),
     );
   }
