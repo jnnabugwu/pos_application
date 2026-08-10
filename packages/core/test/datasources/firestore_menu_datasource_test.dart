@@ -23,78 +23,110 @@ void main() {
       datasource = FirestoreMenuDataSource(firestore);
     });
 
-    test('createItem writes a new doc with an auto id and returns Right(item)', () async {
-      final result = await datasource.createItem(
-        name: 'Latte',
-        priceCents: 450,
-        category: 'Drinks',
-      );
+    test(
+      'createItem writes a new doc with an auto id and returns Right(item)',
+      () async {
+        final result = await datasource.createItem(
+          name: 'Latte',
+          priceCents: 450,
+          category: 'Drinks',
+        );
 
-      final item = _asItem(result);
-      expect(item.id, isNotEmpty);
-      expect(item.name, 'Latte');
-      expect(item.priceCents, 450);
-      expect(item.category, 'Drinks');
-      expect(item.available, true);
+        final item = _asItem(result);
+        expect(item.id, isNotEmpty);
+        expect(item.name, 'Latte');
+        expect(item.priceCents, 450);
+        expect(item.category, 'Drinks');
+        expect(item.available, true);
 
-      final stored = await firestore.collection('menuItems').doc(item.id).get();
-      expect(stored.exists, true);
-      expect(stored.data()!['name'], 'Latte');
-    });
+        final stored = await firestore
+            .collection('menuItems')
+            .doc(item.id)
+            .get();
+        expect(stored.exists, true);
+        expect(stored.data()!['name'], 'Latte');
+      },
+    );
 
     test('updateItem writes the changed fields and bumps updatedAt', () async {
       final created = _asItem(
-        await datasource.createItem(name: 'Latte', priceCents: 450, category: 'Drinks'),
+        await datasource.createItem(
+          name: 'Latte',
+          priceCents: 450,
+          category: 'Drinks',
+        ),
       );
 
-      final result = await datasource.updateItem(created.copyWith(name: 'Mocha'));
+      final result = await datasource.updateItem(
+        created.copyWith(name: 'Mocha'),
+      );
 
       expect(result, const Right(unit));
-      final stored = await firestore.collection('menuItems').doc(created.id).get();
+      final stored = await firestore
+          .collection('menuItems')
+          .doc(created.id)
+          .get();
       expect(stored.data()!['name'], 'Mocha');
     });
 
     test('deleteItem removes the doc', () async {
       final created = _asItem(
-        await datasource.createItem(name: 'Latte', priceCents: 450, category: 'Drinks'),
+        await datasource.createItem(
+          name: 'Latte',
+          priceCents: 450,
+          category: 'Drinks',
+        ),
       );
 
       final result = await datasource.deleteItem(created.id);
 
       expect(result, const Right(unit));
-      final stored = await firestore.collection('menuItems').doc(created.id).get();
+      final stored = await firestore
+          .collection('menuItems')
+          .doc(created.id)
+          .get();
       expect(stored.exists, false);
     });
 
     test('setAvailability flips the available field', () async {
       final created = _asItem(
-        await datasource.createItem(name: 'Latte', priceCents: 450, category: 'Drinks'),
+        await datasource.createItem(
+          name: 'Latte',
+          priceCents: 450,
+          category: 'Drinks',
+        ),
       );
 
       final result = await datasource.setAvailability(created.id, false);
 
       expect(result, const Right(unit));
-      final stored = await firestore.collection('menuItems').doc(created.id).get();
+      final stored = await firestore
+          .collection('menuItems')
+          .doc(created.id)
+          .get();
       expect(stored.data()!['available'], false);
     });
 
-    test('watchMenu streams items with Timestamp converted to DateTime', () async {
-      final createdAt = DateTime(2026, 1, 1, 9);
-      await firestore.collection('menuItems').doc('item-1').set({
-        'name': 'Latte',
-        'priceCents': 450,
-        'category': 'Drinks',
-        'available': true,
-        'createdAt': Timestamp.fromDate(createdAt),
-        'updatedAt': Timestamp.fromDate(createdAt),
-      });
+    test(
+      'watchMenu streams items with Timestamp converted to DateTime',
+      () async {
+        final createdAt = DateTime(2026, 1, 1, 9);
+        await firestore.collection('menuItems').doc('item-1').set({
+          'name': 'Latte',
+          'priceCents': 450,
+          'category': 'Drinks',
+          'available': true,
+          'createdAt': Timestamp.fromDate(createdAt),
+          'updatedAt': Timestamp.fromDate(createdAt),
+        });
 
-      final items = await datasource.watchMenu().first;
+        final items = await datasource.watchMenu().first;
 
-      expect(items.single.id, 'item-1');
-      expect(items.single.createdAt, createdAt);
-      expect(items.single.updatedAt, createdAt);
-    });
+        expect(items.single.id, 'item-1');
+        expect(items.single.createdAt, createdAt);
+        expect(items.single.updatedAt, createdAt);
+      },
+    );
   });
 
   group('failure paths (mocktail)', () {
@@ -120,7 +152,10 @@ void main() {
 
       test('maps a FirebaseException to a typed Failure', () async {
         when(() => docRef.set(any())).thenThrow(
-          FirebaseException(plugin: 'cloud_firestore', code: 'permission-denied'),
+          FirebaseException(
+            plugin: 'cloud_firestore',
+            code: 'permission-denied',
+          ),
         );
 
         final result = await datasource.createItem(
@@ -213,7 +248,10 @@ void main() {
 
       test('maps a FirebaseException to a typed Failure', () async {
         when(() => docRef.update(any())).thenThrow(
-          FirebaseException(plugin: 'cloud_firestore', code: 'permission-denied'),
+          FirebaseException(
+            plugin: 'cloud_firestore',
+            code: 'permission-denied',
+          ),
         );
 
         final result = await datasource.setAvailability('item-1', false);
@@ -232,23 +270,25 @@ void main() {
     });
   });
 
-  group('watchMenu error propagation (mocktail, behavioral not required for coverage)', () {
-    test('a Firestore stream error propagates uncaught', () {
-      final firestore = MockFirebaseFirestore();
-      final collection = MockCollectionReference();
-      final query = MockQuery();
-      final datasource = FirestoreMenuDataSource(firestore);
+  group(
+    'watchMenu error propagation (mocktail, behavioral not required for coverage)',
+    () {
+      test('a Firestore stream error propagates uncaught', () {
+        final firestore = MockFirebaseFirestore();
+        final collection = MockCollectionReference();
+        final query = MockQuery();
+        final datasource = FirestoreMenuDataSource(firestore);
 
-      when(() => firestore.collection('menuItems')).thenReturn(collection);
-      when(() => collection.orderBy('category')).thenReturn(query);
-      when(() => query.snapshots()).thenAnswer(
-        (_) => Stream.error(FirebaseException(plugin: 'cloud_firestore', code: 'unavailable')),
-      );
+        when(() => firestore.collection('menuItems')).thenReturn(collection);
+        when(() => collection.orderBy('category')).thenReturn(query);
+        when(() => query.snapshots()).thenAnswer(
+          (_) => Stream.error(
+            FirebaseException(plugin: 'cloud_firestore', code: 'unavailable'),
+          ),
+        );
 
-      expect(
-        datasource.watchMenu(),
-        emitsError(isA<FirebaseException>()),
-      );
-    });
-  });
+        expect(datasource.watchMenu(), emitsError(isA<FirebaseException>()));
+      });
+    },
+  );
 }

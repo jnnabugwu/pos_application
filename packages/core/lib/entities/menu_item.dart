@@ -72,12 +72,12 @@ class MenuItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        priceCents,
-        category,
-        available,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    name,
+    priceCents,
+    category,
+    available,
+    createdAt,
+    updatedAt,
+  ];
 }

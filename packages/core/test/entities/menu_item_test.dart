@@ -31,15 +31,24 @@ void main() {
   });
 
   group('copyWith', () {
-    test('with no arguments returns an equal item (id/createdAt always kept)', () {
-      final copy = item.copyWith();
-      expect(copy, item);
-      expect(copy.id, item.id);
-      expect(copy.createdAt, item.createdAt);
-    });
+    test(
+      'with no arguments returns an equal item (id/createdAt always kept)',
+      () {
+        final copy = item.copyWith();
+        expect(copy, item);
+        expect(copy.id, item.id);
+        expect(copy.createdAt, item.createdAt);
+      },
+    );
 
     test('with arguments overrides only the given fields', () {
-      final copy = item.copyWith(name: 'Mocha', priceCents: 500, category: 'Hot Drinks', available: false, updatedAt: updatedAt.add(const Duration(minutes: 1)));
+      final copy = item.copyWith(
+        name: 'Mocha',
+        priceCents: 500,
+        category: 'Hot Drinks',
+        available: false,
+        updatedAt: updatedAt.add(const Duration(minutes: 1)),
+      );
       expect(copy.id, item.id);
       expect(copy.name, 'Mocha');
       expect(copy.priceCents, 500);

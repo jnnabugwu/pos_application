@@ -5,7 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const uid = 'uid-1';
   const map = {'email': 'admin@example.com', 'role': 'admin'};
-  const user = AppUser(uid: uid, email: 'admin@example.com', role: AppRole.admin);
+  const user = AppUser(
+    uid: uid,
+    email: 'admin@example.com',
+    role: AppRole.admin,
+  );
 
   test('fromMap builds an AppUser from a Firestore-shaped map', () {
     expect(AppUser.fromMap(uid, map), user);

@@ -92,7 +92,10 @@ class FirestoreMenuDataSource implements MenuRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> setAvailability(String id, bool available) async {
+  Future<Either<Failure, Unit>> setAvailability(
+    String id,
+    bool available,
+  ) async {
     try {
       await _collection.doc(id).update({
         'available': available,

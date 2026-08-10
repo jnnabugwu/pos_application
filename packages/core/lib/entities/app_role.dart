@@ -5,7 +5,7 @@ enum AppRole {
   staff;
 
   static AppRole fromName(String name) => AppRole.values.firstWhere(
-        (role) => role.name == name,
-        orElse: () => throw ArgumentError('Unknown AppRole: $name'),
-      );
+    (role) => role.name == name,
+    orElse: () => throw ArgumentError('Unknown AppRole: $name'),
+  );
 }

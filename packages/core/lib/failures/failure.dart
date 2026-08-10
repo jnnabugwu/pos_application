@@ -20,7 +20,9 @@ class NetworkFailure extends Failure {
 /// The signed-in user isn't allowed to perform this action (maps from
 /// Firestore/Auth `permission-denied`).
 class PermissionFailure extends Failure {
-  const PermissionFailure([super.message = 'You don\'t have permission to do that.']);
+  const PermissionFailure([
+    super.message = 'You don\'t have permission to do that.',
+  ]);
 }
 
 /// The requested document doesn't exist.
@@ -30,7 +32,9 @@ class NotFoundFailure extends Failure {
 
 /// Invalid credentials on sign-in (wrong password, no such user, etc).
 class InvalidCredentialsFailure extends Failure {
-  const InvalidCredentialsFailure([super.message = 'Incorrect email or password.']);
+  const InvalidCredentialsFailure([
+    super.message = 'Incorrect email or password.',
+  ]);
 }
 
 /// Anything else — the message carries whatever detail is available.

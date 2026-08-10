@@ -12,11 +12,7 @@ class AppUser extends Equatable {
   final String email;
   final AppRole role;
 
-  const AppUser({
-    required this.uid,
-    required this.email,
-    required this.role,
-  });
+  const AppUser({required this.uid, required this.email, required this.role});
 
   factory AppUser.fromMap(String uid, Map<String, dynamic> map) {
     return AppUser(
@@ -27,10 +23,7 @@ class AppUser extends Equatable {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'email': email,
-      'role': role.name,
-    };
+    return {'email': email, 'role': role.name};
   }
 
   @override

@@ -14,11 +14,17 @@ void main() {
 
   group('PermissionFailure', () {
     test('has a default message', () {
-      expect(const PermissionFailure().message, "You don't have permission to do that.");
+      expect(
+        const PermissionFailure().message,
+        "You don't have permission to do that.",
+      );
     });
 
     test('accepts a custom message', () {
-      expect(const PermissionFailure('no role assigned').message, 'no role assigned');
+      expect(
+        const PermissionFailure('no role assigned').message,
+        'no role assigned',
+      );
     });
   });
 
@@ -34,11 +40,17 @@ void main() {
 
   group('InvalidCredentialsFailure', () {
     test('has a default message', () {
-      expect(const InvalidCredentialsFailure().message, 'Incorrect email or password.');
+      expect(
+        const InvalidCredentialsFailure().message,
+        'Incorrect email or password.',
+      );
     });
 
     test('accepts a custom message', () {
-      expect(const InvalidCredentialsFailure('bad password').message, 'bad password');
+      expect(
+        const InvalidCredentialsFailure('bad password').message,
+        'bad password',
+      );
     });
   });
 
@@ -52,7 +64,10 @@ void main() {
     expect(const NetworkFailure('x'), const NetworkFailure('x'));
   });
 
-  test('failures with different types are not equal, even with the same message', () {
-    expect(const NetworkFailure('x'), isNot(const UnknownFailure('x')));
-  });
+  test(
+    'failures with different types are not equal, even with the same message',
+    () {
+      expect(const NetworkFailure('x'), isNot(const UnknownFailure('x')));
+    },
+  );
 }

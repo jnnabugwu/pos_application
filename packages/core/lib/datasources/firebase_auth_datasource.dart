@@ -45,7 +45,9 @@ class FirebaseAuthDataSource implements AuthRepository {
       final appUser = await _resolveAppUser(credential.user);
       if (appUser == null) {
         return const Left(
-          PermissionFailure('Signed in, but no role is assigned to this account.'),
+          PermissionFailure(
+            'Signed in, but no role is assigned to this account.',
+          ),
         );
       }
       return Right(appUser);
