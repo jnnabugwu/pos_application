@@ -13,6 +13,7 @@ dependencies:
   equatable: ^2.1.0
   firebase_auth: ^6.5.7
   firebase_core: ^4.13.0
+  get_it: ^9.2.1
   flutter:
     sdk: flutter
 

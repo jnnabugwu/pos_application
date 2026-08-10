@@ -2,6 +2,8 @@
 /// used by both `pos_app` and `manager_app`.
 library;
 
+export 'di/register_core_dependencies.dart';
+
 export 'entities/app_role.dart';
 export 'entities/app_user.dart';
 export 'entities/menu_item.dart';
