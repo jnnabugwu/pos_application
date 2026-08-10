@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# One-off Node scripts (scripts/) install their deps locally, not committed
+node_modules/
