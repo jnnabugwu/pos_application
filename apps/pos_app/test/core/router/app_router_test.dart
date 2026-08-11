@@ -1,10 +1,9 @@
+import 'package:core/core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pos_app/core/router/app_router.dart';
 import 'package:pos_app/core/router/app_routes.dart';
-import 'package:pos_app/core/router/auth_listenable.dart';
-import 'package:pos_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../support/fake_auth_repository.dart';
@@ -12,7 +11,7 @@ import '../../support/fake_auth_repository.dart';
 void main() {
   group('buildRouter', () {
     testWidgets(
-      'starts on /login rather than /menu, so no route builds and reads '
+      'starts on /login rather than /order, so no route builds and reads '
       'menu data before auth state is resolved',
       (tester) async {
         final authRepository = MockAuthRepository();
@@ -46,7 +45,7 @@ void main() {
         resolveRedirect(
           isReady: false,
           isLoggedIn: false,
-          location: AppRoutes.menu(),
+          location: AppRoutes.order(),
         ),
         isNull,
       );
@@ -65,7 +64,7 @@ void main() {
         resolveRedirect(
           isReady: true,
           isLoggedIn: false,
-          location: AppRoutes.menu(),
+          location: AppRoutes.order(),
         ),
         AppRoutes.login(),
       );
@@ -82,23 +81,23 @@ void main() {
       );
     });
 
-    test('redirects signed-in users away from /login to /menu', () {
+    test('redirects signed-in users away from /login to /order', () {
       expect(
         resolveRedirect(
           isReady: true,
           isLoggedIn: true,
           location: AppRoutes.login(),
         ),
-        AppRoutes.menu(),
+        AppRoutes.order(),
       );
     });
 
-    test('does not redirect a signed-in user already on /menu', () {
+    test('does not redirect a signed-in user already on /order', () {
       expect(
         resolveRedirect(
           isReady: true,
           isLoggedIn: true,
-          location: AppRoutes.menu(),
+          location: AppRoutes.order(),
         ),
         isNull,
       );

@@ -9,6 +9,7 @@ void main() {
     'priceCents': 450,
     'category': 'Drinks',
     'available': true,
+    'stockCount': 12,
     'createdAt': createdAt,
     'updatedAt': updatedAt,
   };
@@ -18,12 +19,18 @@ void main() {
     priceCents: 450,
     category: 'Drinks',
     available: true,
+    stockCount: 12,
     createdAt: createdAt,
     updatedAt: updatedAt,
   );
 
   test('fromMap builds a MenuItem from a Firestore-shaped map', () {
     expect(MenuItem.fromMap('item-1', map), item);
+  });
+
+  test('fromMap defaults stockCount to 0 when absent from the map', () {
+    final legacyMap = {...map}..remove('stockCount');
+    expect(MenuItem.fromMap('item-1', legacyMap).stockCount, 0);
   });
 
   test('toMap round-trips back to the original map', () {
@@ -47,6 +54,7 @@ void main() {
         priceCents: 500,
         category: 'Hot Drinks',
         available: false,
+        stockCount: 5,
         updatedAt: updatedAt.add(const Duration(minutes: 1)),
       );
       expect(copy.id, item.id);
@@ -54,6 +62,7 @@ void main() {
       expect(copy.priceCents, 500);
       expect(copy.category, 'Hot Drinks');
       expect(copy.available, false);
+      expect(copy.stockCount, 5);
       expect(copy.createdAt, item.createdAt);
       expect(copy.updatedAt, updatedAt.add(const Duration(minutes: 1)));
     });
@@ -67,6 +76,7 @@ void main() {
         priceCents: 450,
         category: 'Drinks',
         available: true,
+        stockCount: 12,
         createdAt: createdAt,
         updatedAt: updatedAt,
       ),
@@ -76,5 +86,9 @@ void main() {
 
   test('items differing by availability are not equal', () {
     expect(item.copyWith(available: false), isNot(item));
+  });
+
+  test('items differing by stockCount are not equal', () {
+    expect(item.copyWith(stockCount: 0), isNot(item));
   });
 }

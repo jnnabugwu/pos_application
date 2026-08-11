@@ -15,7 +15,7 @@ void main() {
     getIt.reset();
   });
 
-  test('registers MenuRepository and AuthRepository', () {
+  test('registers MenuRepository, AuthRepository, and OrderRepository', () {
     registerCoreDependencies(
       getIt,
       firestore: FakeFirebaseFirestore(),
@@ -24,7 +24,9 @@ void main() {
 
     expect(getIt.isRegistered<MenuRepository>(), isTrue);
     expect(getIt.isRegistered<AuthRepository>(), isTrue);
+    expect(getIt.isRegistered<OrderRepository>(), isTrue);
     expect(getIt<MenuRepository>(), isA<FirestoreMenuDataSource>());
     expect(getIt<AuthRepository>(), isA<FirebaseAuthDataSource>());
+    expect(getIt<OrderRepository>(), isA<FirestoreOrderDataSource>());
   });
 }

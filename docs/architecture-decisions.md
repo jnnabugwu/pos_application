@@ -75,3 +75,56 @@ developer's own `firebase login` session available — switch to a real
 service-account key (or Workload Identity Federation for CI) rather than
 this technique; it depends on `firebase-tools`' internal module layout,
 which isn't a public API and could change between versions.
+
+## Remaining concurrency gaps: client-only idempotency, no reservation step
+
+**The assumption this build makes:** one instance of `pos_app` and one
+instance of `manager_app` running at a time (one POS terminal, one manager
+device) — not multiple staff-facing terminals or multiple managers editing
+concurrently. Firestore transactions still make the pieces that *are*
+implemented safe under that assumption (checkout's stock decrement, and
+checkout's own retry-idempotency below); what's deliberately not built is
+the harder distributed-systems layer that would make this safe with
+multiple concurrent writers.
+
+**What's already handled (client + Firestore transaction only, no
+backend):**
+
+- Two checkouts decrementing the same item's stock race safely — the
+  decrement happens inside a `runTransaction` in
+  `FirestoreOrderDataSource.createOrder` (`packages/core/lib/datasources/firestore_order_datasource.dart`).
+- Retrying *the same* checkout attempt (e.g. the write committed but the
+  client never saw the ack, so the user taps Checkout again) doesn't create
+  a duplicate order or double-decrement stock — `OrderBloc` generates a
+  request id once per attempt and reuses it across retries; the datasource
+  writes to `orders/{requestId}` and treats an already-existing doc as "already
+  applied, hand back what's there" rather than re-running the decrement.
+
+**What a real backend would add, if multiple instances were in play:**
+
+- **Durable idempotency, not just in-memory.** `OrderBloc._checkoutRequestId`
+  lives in memory — if the app crashes mid-checkout and restarts, that id is
+  gone, and there's no way for the client to ask "did my last attempt
+  actually commit?" other than the order simply not appearing. A backend
+  with a durable request log (or a client-persisted pending-request id
+  written to disk before the network call) would close that gap.
+- **Restock vs. concurrent sale on the same item.** `MenuItemFormPage`'s
+  restock flow (`MenuRepository.updateItem`) writes an absolute
+  `stockCount` typed by a manager; if a checkout decrements that same
+  item's stock between when the form loaded and when the manager saves, the
+  save overwrites the sale's decrement with the (now-stale) typed number.
+  This build already stops `updateItem` from touching `available` for
+  exactly this reason (see the datasource's doc comment), but doesn't
+  extend the same treatment to `stockCount`, since restocking is this
+  form's actual job — a correct fix is a delta-based "adjust stock by ±N"
+  write (or an optimistic-concurrency version check) rather than
+  "set stock to N", which is a small backend endpoint or a Cloud Function,
+  not something Firestore security rules alone can express well.
+- **Multiple POS terminals selling the same running low item.** Handled
+  correctly today by the transaction (no oversell past what the transaction
+  sees at commit time), but there's no reservation/hold step — two staff
+  members can both have the last unit in their cart simultaneously and only
+  find out one lost at checkout time. A backend with a short-lived
+  reservation (or a queue that serializes checkouts) would give the second
+  staff member that feedback before they finish building the order, not
+  after.

@@ -1,7 +1,7 @@
+import 'package:core/core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pos_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:pos_app/features/auth/presentation/view/login_page.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -12,6 +12,9 @@ void main() {
     tester,
   ) async {
     final authRepository = MockAuthRepository();
+    when(
+      () => authRepository.authStateChanges(),
+    ).thenAnswer((_) => const Stream.empty());
     final bloc = AuthBloc(authRepository);
     addTearDown(bloc.close);
 
@@ -32,6 +35,9 @@ void main() {
     'shows a validation message and does not call signIn when fields are empty',
     (tester) async {
       final authRepository = MockAuthRepository();
+      when(
+        () => authRepository.authStateChanges(),
+      ).thenAnswer((_) => const Stream.empty());
       final bloc = AuthBloc(authRepository);
       addTearDown(bloc.close);
 

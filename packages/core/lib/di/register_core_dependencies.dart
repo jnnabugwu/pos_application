@@ -4,8 +4,10 @@ import 'package:get_it/get_it.dart';
 
 import '../datasources/firebase_auth_datasource.dart';
 import '../datasources/firestore_menu_datasource.dart';
+import '../datasources/firestore_order_datasource.dart';
 import '../repositories/auth_repository.dart';
 import '../repositories/menu_repository.dart';
+import '../repositories/order_repository.dart';
 
 /// Registers the cross-app singletons both `pos_app` and `manager_app` need:
 /// the Firebase SDK instances and the real repository implementations.
@@ -36,5 +38,8 @@ void registerCoreDependencies(
       it<fb_auth.FirebaseAuth>(),
       it<FirebaseFirestore>(),
     ),
+  );
+  it.registerLazySingleton<OrderRepository>(
+    () => FirestoreOrderDataSource(it<FirebaseFirestore>()),
   );
 }

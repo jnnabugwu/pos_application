@@ -44,7 +44,13 @@ class FirestoreMenuDataSource implements MenuRepository {
     required String name,
     required int priceCents,
     required String category,
+    required int stockCount,
   }) async {
+    if (priceCents < 0 || stockCount < 0) {
+      return const Left(
+        UnknownFailure('Price and stock must be non-negative.'),
+      );
+    }
     try {
       final now = DateTime.now();
       final docRef = _collection.doc();
@@ -54,6 +60,7 @@ class FirestoreMenuDataSource implements MenuRepository {
         priceCents: priceCents,
         category: category,
         available: true,
+        stockCount: stockCount,
         createdAt: now,
         updatedAt: now,
       );
@@ -67,10 +74,30 @@ class FirestoreMenuDataSource implements MenuRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> updateItem(MenuItem item) async {
+  Future<Either<Failure, Unit>> updateItem(
+    String id, {
+    required String name,
+    required String category,
+    required int priceCents,
+    required int stockCount,
+  }) async {
+    if (priceCents < 0 || stockCount < 0) {
+      return const Left(
+        UnknownFailure('Price and stock must be non-negative.'),
+      );
+    }
     try {
-      final updated = item.copyWith(updatedAt: DateTime.now());
-      await _collection.doc(item.id).update(updated.toMap());
+      // `available` is intentionally not part of this payload — it's only
+      // ever changed via setAvailability, so a manager editing name/price
+      // from a snapshot taken before a staff member toggled it can't
+      // silently revert that toggle on save.
+      await _collection.doc(id).update({
+        'name': name,
+        'category': category,
+        'priceCents': priceCents,
+        'stockCount': stockCount,
+        'updatedAt': DateTime.now(),
+      });
       return const Right(unit);
     } on FirebaseException catch (e) {
       return Left(mapFirebaseException(e));

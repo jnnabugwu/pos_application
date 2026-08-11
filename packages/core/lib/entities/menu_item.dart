@@ -16,6 +16,9 @@ class MenuItem extends Equatable {
   final int priceCents;
   final String category;
   final bool available;
+
+  /// How many units are currently in stock.
+  final int stockCount;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -25,6 +28,7 @@ class MenuItem extends Equatable {
     required this.priceCents,
     required this.category,
     required this.available,
+    required this.stockCount,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -36,6 +40,9 @@ class MenuItem extends Equatable {
       priceCents: map['priceCents'] as int,
       category: map['category'] as String,
       available: map['available'] as bool,
+      // Defaults to 0 rather than throwing so docs written before this field
+      // existed (see scripts/seed_menu_items.js) still read successfully.
+      stockCount: map['stockCount'] as int? ?? 0,
       createdAt: map['createdAt'] as DateTime,
       updatedAt: map['updatedAt'] as DateTime,
     );
@@ -47,6 +54,7 @@ class MenuItem extends Equatable {
       'priceCents': priceCents,
       'category': category,
       'available': available,
+      'stockCount': stockCount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -57,6 +65,7 @@ class MenuItem extends Equatable {
     int? priceCents,
     String? category,
     bool? available,
+    int? stockCount,
     DateTime? updatedAt,
   }) {
     return MenuItem(
@@ -65,6 +74,7 @@ class MenuItem extends Equatable {
       priceCents: priceCents ?? this.priceCents,
       category: category ?? this.category,
       available: available ?? this.available,
+      stockCount: stockCount ?? this.stockCount,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -77,6 +87,7 @@ class MenuItem extends Equatable {
     priceCents,
     category,
     available,
+    stockCount,
     createdAt,
     updatedAt,
   ];
