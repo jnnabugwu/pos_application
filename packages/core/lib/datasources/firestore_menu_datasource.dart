@@ -44,6 +44,7 @@ class FirestoreMenuDataSource implements MenuRepository {
     required String name,
     required int priceCents,
     required String category,
+    required int stockCount,
   }) async {
     try {
       final now = DateTime.now();
@@ -54,6 +55,7 @@ class FirestoreMenuDataSource implements MenuRepository {
         priceCents: priceCents,
         category: category,
         available: true,
+        stockCount: stockCount,
         createdAt: now,
         updatedAt: now,
       );

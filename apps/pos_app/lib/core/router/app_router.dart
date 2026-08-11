@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/view/login_page.dart';
-import '../../features/menu/presentation/bloc/menu_bloc.dart';
-import '../../features/menu/presentation/bloc/menu_event.dart';
-import '../../features/menu/presentation/view/menu_page.dart';
+import '../../features/order/presentation/bloc/order_bloc.dart';
+import '../../features/order/presentation/bloc/order_event.dart';
+import '../../features/order/presentation/view/order_page.dart';
 import '../di/injection.dart';
 import 'app_routes.dart';
 import 'auth_listenable.dart';
@@ -21,15 +21,16 @@ String? resolveRedirect({
   if (!isReady) return null;
   final loggingIn = location == AppRoutes.login();
   if (!isLoggedIn && !loggingIn) return AppRoutes.login();
-  if (isLoggedIn && loggingIn) return AppRoutes.menu();
+  if (isLoggedIn && loggingIn) return AppRoutes.order();
   return null;
 }
 
 GoRouter buildRouter(AuthListenable authListenable) {
   return GoRouter(
-    // Start on /login, not /menu: until AuthListenable.ready flips true the
-    // redirect below is a no-op, so landing on /menu would build MenuPage
-    // and fire a Firestore read before we know whether anyone is signed in.
+    // Start on /login, not /order: until AuthListenable.ready flips true
+    // the redirect below is a no-op, so landing on /order would build
+    // OrderPage and fire a Firestore read before we know whether anyone is
+    // signed in.
     initialLocation: AppRoutes.login(),
     refreshListenable: authListenable,
     redirect: (context, state) => resolveRedirect(
@@ -43,10 +44,10 @@ GoRouter buildRouter(AuthListenable authListenable) {
         builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
-        path: AppRoutes.menu(),
-        builder: (context, state) => BlocProvider<MenuBloc>(
-          create: (_) => getIt<MenuBloc>()..add(const WatchMenuStarted()),
-          child: const MenuPage(),
+        path: AppRoutes.order(),
+        builder: (context, state) => BlocProvider<OrderBloc>(
+          create: (_) => getIt<OrderBloc>()..add(const WatchMenuStarted()),
+          child: const OrderPage(),
         ),
       ),
     ],

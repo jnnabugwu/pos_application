@@ -2,8 +2,7 @@ import 'package:core/core.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
-import '../../features/menu/presentation/bloc/menu_bloc.dart';
+import '../../features/order/presentation/bloc/order_bloc.dart';
 import '../router/app_router.dart';
 import '../router/auth_listenable.dart';
 
@@ -20,13 +19,15 @@ void configureDependencies() {
     () => buildRouter(getIt<AuthListenable>()),
   );
 
-  // App-level singleton: shared by LoginPage (sign-in) and MenuPage's
+  // App-level singleton: shared by LoginPage (sign-in) and OrderPage's
   // sign-out action, so it outlives any single screen.
   getIt.registerLazySingleton<AuthBloc>(
     () => AuthBloc(getIt<AuthRepository>()),
   );
 
   // Factory: fresh instance (and fresh watchMenu() subscription) each time
-  // /menu is entered; disposed by BlocProvider when the route is left.
-  getIt.registerFactory<MenuBloc>(() => MenuBloc(getIt<MenuRepository>()));
+  // /order is entered; disposed by BlocProvider when the route is left.
+  getIt.registerFactory<OrderBloc>(
+    () => OrderBloc(getIt<MenuRepository>(), getIt<OrderRepository>()),
+  );
 }

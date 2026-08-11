@@ -1,7 +1,7 @@
+import 'package:core/core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pos_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:pos_app/features/auth/presentation/view/login_page.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 

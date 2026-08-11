@@ -30,6 +30,7 @@ void main() {
           name: 'Latte',
           priceCents: 450,
           category: 'Drinks',
+          stockCount: 20,
         );
 
         final item = _asItem(result);
@@ -38,6 +39,7 @@ void main() {
         expect(item.priceCents, 450);
         expect(item.category, 'Drinks');
         expect(item.available, true);
+        expect(item.stockCount, 20);
 
         final stored = await firestore
             .collection('menuItems')
@@ -45,6 +47,7 @@ void main() {
             .get();
         expect(stored.exists, true);
         expect(stored.data()!['name'], 'Latte');
+        expect(stored.data()!['stockCount'], 20);
       },
     );
 
@@ -54,11 +57,12 @@ void main() {
           name: 'Latte',
           priceCents: 450,
           category: 'Drinks',
+          stockCount: 20,
         ),
       );
 
       final result = await datasource.updateItem(
-        created.copyWith(name: 'Mocha'),
+        created.copyWith(name: 'Mocha', stockCount: 15),
       );
 
       expect(result, const Right(unit));
@@ -67,6 +71,7 @@ void main() {
           .doc(created.id)
           .get();
       expect(stored.data()!['name'], 'Mocha');
+      expect(stored.data()!['stockCount'], 15);
     });
 
     test('deleteItem removes the doc', () async {
@@ -75,6 +80,7 @@ void main() {
           name: 'Latte',
           priceCents: 450,
           category: 'Drinks',
+          stockCount: 20,
         ),
       );
 
@@ -94,6 +100,7 @@ void main() {
           name: 'Latte',
           priceCents: 450,
           category: 'Drinks',
+          stockCount: 20,
         ),
       );
 
@@ -116,6 +123,7 @@ void main() {
           'priceCents': 450,
           'category': 'Drinks',
           'available': true,
+          'stockCount': 20,
           'createdAt': Timestamp.fromDate(createdAt),
           'updatedAt': Timestamp.fromDate(createdAt),
         });
@@ -125,6 +133,26 @@ void main() {
         expect(items.single.id, 'item-1');
         expect(items.single.createdAt, createdAt);
         expect(items.single.updatedAt, createdAt);
+        expect(items.single.stockCount, 20);
+      },
+    );
+
+    test(
+      'watchMenu defaults stockCount to 0 for docs written before that field existed',
+      () async {
+        final createdAt = DateTime(2026, 1, 1, 9);
+        await firestore.collection('menuItems').doc('item-legacy').set({
+          'name': 'Legacy Item',
+          'priceCents': 100,
+          'category': 'Drinks',
+          'available': true,
+          'createdAt': Timestamp.fromDate(createdAt),
+          'updatedAt': Timestamp.fromDate(createdAt),
+        });
+
+        final items = await datasource.watchMenu().first;
+
+        expect(items.single.stockCount, 0);
       },
     );
   });
@@ -162,6 +190,7 @@ void main() {
           name: 'Latte',
           priceCents: 450,
           category: 'Drinks',
+          stockCount: 20,
         );
 
         expect(result, const Left(PermissionFailure()));
@@ -174,6 +203,7 @@ void main() {
           name: 'Latte',
           priceCents: 450,
           category: 'Drinks',
+          stockCount: 20,
         );
 
         expect(result, isA<Left>());
@@ -188,6 +218,7 @@ void main() {
         priceCents: 450,
         category: 'Drinks',
         available: true,
+        stockCount: 20,
         createdAt: DateTime(2026),
         updatedAt: DateTime(2026),
       );

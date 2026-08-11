@@ -13,7 +13,19 @@ service cloud.firestore {
 
     match /menuItems/{itemId} {
       allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow create, delete: if isAdmin();
+      // Any signed-in user (not just admin) can update stock/availability —
+      // needed for staff toggling availability and checkout decrementing
+      // stock. Renaming/repricing/recategorizing an item stays admin-only.
+      allow update: if isAdmin()
+        || (
+          isSignedIn() &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['stockCount', 'available', 'updatedAt']) &&
+          request.resource.data.stockCount is int &&
+          request.resource.data.stockCount >= 0 &&
+          request.resource.data.available is bool
+        );
     }
 
     match /orders/{orderId} {

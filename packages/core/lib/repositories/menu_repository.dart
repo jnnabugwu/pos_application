@@ -16,6 +16,7 @@ abstract class MenuRepository {
     required String name,
     required int priceCents,
     required String category,
+    required int stockCount,
   });
 
   Future<Either<Failure, Unit>> updateItem(MenuItem item);

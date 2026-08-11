@@ -65,6 +65,7 @@ function buildRandomItems(count) {
       priceCents: randomInt(min, max),
       // ~85% available, rest unavailable, so the toggle UI has something to show.
       available: Math.random() < 0.85,
+      stockCount: randomInt(0, 40),
     };
   });
 }
@@ -76,6 +77,7 @@ function toFirestoreDocument(item, now) {
       category: { stringValue: item.category },
       priceCents: { integerValue: String(item.priceCents) },
       available: { booleanValue: item.available },
+      stockCount: { integerValue: String(item.stockCount) },
       createdAt: { timestampValue: now },
       updatedAt: { timestampValue: now },
     },
@@ -112,7 +114,7 @@ async function main() {
       throw new Error(`Failed to create "${item.name}": ${res.status} ${body}`);
     }
     created += 1;
-    console.log(`  + [${item.category}] ${item.name} — $${(item.priceCents / 100).toFixed(2)}${item.available ? '' : ' (unavailable)'}`);
+    console.log(`  + [${item.category}] ${item.name} — $${(item.priceCents / 100).toFixed(2)} — ${item.stockCount} in stock${item.available ? '' : ' (unavailable)'}`);
   }
 
   console.log(`\nSeeded ${created} menuItems documents into ${PROJECT_ID}.`);
