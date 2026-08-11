@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/menu/presentation/bloc/menu_bloc.dart';
 import '../router/app_router.dart';
-import '../router/auth_listenable.dart';
 
 final getIt = GetIt.instance;
 

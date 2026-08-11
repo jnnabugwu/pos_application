@@ -42,11 +42,5 @@ class OrderState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-    status,
-    menuItems,
-    cart,
-    isCheckingOut,
-    failure,
-  ];
+  List<Object?> get props => [status, menuItems, cart, isCheckingOut, failure];
 }

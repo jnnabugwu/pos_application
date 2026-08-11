@@ -22,6 +22,9 @@ class Order extends Equatable {
     required this.createdAt,
   });
 
+  /// Used by the Firestore order datasource to hand back the
+  /// already-committed order when a checkout retry's request id matches one
+  /// it already wrote — not a general order-reading API.
   factory Order.fromMap(String id, Map<String, dynamic> map) {
     return Order(
       id: id,

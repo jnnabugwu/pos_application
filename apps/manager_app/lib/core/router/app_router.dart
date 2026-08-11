@@ -10,7 +10,6 @@ import '../../features/menu/presentation/view/menu_item_form_page.dart';
 import '../../features/menu/presentation/view/menu_page.dart';
 import '../di/injection.dart';
 import 'app_routes.dart';
-import 'auth_listenable.dart';
 
 /// Pure redirect decision, kept separate from [GoRouter] so it's unit
 /// testable without a BuildContext/GoRouterState.
@@ -27,9 +26,9 @@ String? resolveRedirect({
   return null;
 }
 
-GoRouter buildRouter(AuthListenable authListenable) {
+GoRouter buildRouter(core.AuthListenable authListenable) {
   return GoRouter(
-    // Start on /login, not /menu: until AuthListenable.ready flips true the
+    // Start on /login, not /menu: until core.AuthListenable.ready flips true the
     // redirect below is a no-op, so landing on /menu would build MenuPage
     // and fire a Firestore read before we know whether anyone is signed in.
     initialLocation: AppRoutes.login(),
@@ -57,6 +56,11 @@ GoRouter buildRouter(AuthListenable authListenable) {
       ),
       GoRoute(
         path: AppRoutes.editItem(),
+        // `extra` only exists for the in-memory navigation from MenuPage's
+        // tile tap — a deep link, browser refresh (web), or restored route
+        // has no way to carry it, so guard rather than crash on the cast.
+        redirect: (context, state) =>
+            state.extra is core.MenuItem ? null : AppRoutes.menu(),
         builder: (context, state) =>
             MenuItemFormPage(item: state.extra as core.MenuItem),
       ),

@@ -19,7 +19,16 @@ abstract class MenuRepository {
     required int stockCount,
   });
 
-  Future<Either<Failure, Unit>> updateItem(MenuItem item);
+  /// Updates only the given fields — deliberately has no `available`
+  /// parameter, so callers can't accidentally overwrite it with a stale
+  /// snapshot value. Use [setAvailability] to change that field.
+  Future<Either<Failure, Unit>> updateItem(
+    String id, {
+    required String name,
+    required String category,
+    required int priceCents,
+    required int stockCount,
+  });
 
   Future<Either<Failure, Unit>> deleteItem(String id);
 

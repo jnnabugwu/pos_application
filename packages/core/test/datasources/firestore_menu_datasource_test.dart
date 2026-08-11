@@ -62,7 +62,11 @@ void main() {
       );
 
       final result = await datasource.updateItem(
-        created.copyWith(name: 'Mocha', stockCount: 15),
+        created.id,
+        name: 'Mocha',
+        category: created.category,
+        priceCents: created.priceCents,
+        stockCount: 15,
       );
 
       expect(result, const Right(unit));
@@ -72,6 +76,82 @@ void main() {
           .get();
       expect(stored.data()!['name'], 'Mocha');
       expect(stored.data()!['stockCount'], 15);
+    });
+
+    test('updateItem does not touch availability even if it changed since '
+        'the caller last read the item', () async {
+      final created = _asItem(
+        await datasource.createItem(
+          name: 'Latte',
+          priceCents: 450,
+          category: 'Drinks',
+          stockCount: 20,
+        ),
+      );
+      // Simulates another staff member toggling availability after this
+      // update's caller loaded their (now-stale) snapshot.
+      await datasource.setAvailability(created.id, false);
+
+      final result = await datasource.updateItem(
+        created.id,
+        name: 'Mocha',
+        category: created.category,
+        priceCents: created.priceCents,
+        stockCount: created.stockCount,
+      );
+
+      expect(result, const Right(unit));
+      final stored = await firestore
+          .collection('menuItems')
+          .doc(created.id)
+          .get();
+      expect(stored.data()!['available'], false);
+    });
+
+    test('createItem rejects a negative price', () async {
+      final result = await datasource.createItem(
+        name: 'Latte',
+        priceCents: -1,
+        category: 'Drinks',
+        stockCount: 20,
+      );
+
+      expect(result, isA<Left>());
+      expect((result as Left).value, isA<UnknownFailure>());
+    });
+
+    test('createItem rejects negative stock', () async {
+      final result = await datasource.createItem(
+        name: 'Latte',
+        priceCents: 450,
+        category: 'Drinks',
+        stockCount: -1,
+      );
+
+      expect(result, isA<Left>());
+      expect((result as Left).value, isA<UnknownFailure>());
+    });
+
+    test('updateItem rejects negative stock', () async {
+      final created = _asItem(
+        await datasource.createItem(
+          name: 'Latte',
+          priceCents: 450,
+          category: 'Drinks',
+          stockCount: 20,
+        ),
+      );
+
+      final result = await datasource.updateItem(
+        created.id,
+        name: created.name,
+        category: created.category,
+        priceCents: created.priceCents,
+        stockCount: -5,
+      );
+
+      expect(result, isA<Left>());
+      expect((result as Left).value, isA<UnknownFailure>());
     });
 
     test('deleteItem removes the doc', () async {
@@ -212,17 +292,6 @@ void main() {
     });
 
     group('updateItem', () {
-      final item = MenuItem(
-        id: 'item-1',
-        name: 'Latte',
-        priceCents: 450,
-        category: 'Drinks',
-        available: true,
-        stockCount: 20,
-        createdAt: DateTime(2026),
-        updatedAt: DateTime(2026),
-      );
-
       setUp(() {
         when(() => collection.doc('item-1')).thenReturn(docRef);
       });
@@ -232,7 +301,13 @@ void main() {
           FirebaseException(plugin: 'cloud_firestore', code: 'unavailable'),
         );
 
-        final result = await datasource.updateItem(item);
+        final result = await datasource.updateItem(
+          'item-1',
+          name: 'Latte',
+          category: 'Drinks',
+          priceCents: 450,
+          stockCount: 20,
+        );
 
         expect(result, const Left(NetworkFailure()));
       });
@@ -240,7 +315,13 @@ void main() {
       test('maps a non-Firebase error to UnknownFailure', () async {
         when(() => docRef.update(any())).thenThrow(StateError('boom'));
 
-        final result = await datasource.updateItem(item);
+        final result = await datasource.updateItem(
+          'item-1',
+          name: 'Latte',
+          category: 'Drinks',
+          priceCents: 450,
+          stockCount: 20,
+        );
 
         expect(result, isA<Left>());
         expect((result as Left).value, isA<UnknownFailure>());

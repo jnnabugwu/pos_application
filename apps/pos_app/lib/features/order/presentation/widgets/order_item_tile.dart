@@ -31,7 +31,7 @@ class OrderItemTile extends StatelessWidget {
               Text('\$$price').muted.textSmall,
               if (!item.available)
                 const Text('Unavailable').muted.textSmall
-              else if (item.stockCount == 0)
+              else if (item.stockCount <= 0)
                 const Text('Sold out').muted.textSmall
               else if (cartQuantity > 0)
                 Text('$cartQuantity in cart').muted.textSmall,

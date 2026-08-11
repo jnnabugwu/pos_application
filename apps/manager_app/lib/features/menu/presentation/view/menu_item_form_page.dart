@@ -49,14 +49,22 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
   Future<void> _submit() async {
     final name = _nameController.text.trim();
     final category = _categoryController.text.trim();
-    final priceCents = ((double.tryParse(_priceController.text.trim()) ?? 0) * 100)
-        .round();
-    final stockCount = int.tryParse(_stockController.text.trim()) ?? 0;
+    final price = double.tryParse(_priceController.text.trim());
+    final stockCount = int.tryParse(_stockController.text.trim());
 
     if (name.isEmpty || category.isEmpty) {
       setState(() => _error = 'Enter both a name and a category.');
       return;
     }
+    if (price == null || price < 0) {
+      setState(() => _error = 'Enter a valid, non-negative price.');
+      return;
+    }
+    if (stockCount == null || stockCount < 0) {
+      setState(() => _error = 'Enter a valid, non-negative stock amount.');
+      return;
+    }
+    final priceCents = (price * 100).round();
 
     setState(() {
       _submitting = true;
@@ -64,14 +72,16 @@ class _MenuItemFormPageState extends State<MenuItemFormPage> {
     });
 
     final repository = getIt<core.MenuRepository>();
+    // Only the fields this form edits are sent — `available` is deliberately
+    // left out so a stale snapshot (opened before another staff member
+    // toggled availability) can't silently revert it on save.
     final result = _isEditing
         ? await repository.updateItem(
-            widget.item!.copyWith(
-              name: name,
-              category: category,
-              priceCents: priceCents,
-              stockCount: stockCount,
-            ),
+            widget.item!.id,
+            name: name,
+            category: category,
+            priceCents: priceCents,
+            stockCount: stockCount,
           )
         : await repository.createItem(
             name: name,

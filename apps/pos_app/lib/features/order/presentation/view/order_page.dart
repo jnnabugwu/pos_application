@@ -16,9 +16,7 @@ const double _wideBreakpoint = 840;
 class OrderPage extends StatelessWidget {
   const OrderPage({super.key});
 
-  Map<String, List<core.MenuItem>> _groupByCategory(
-    List<core.MenuItem> items,
-  ) {
+  Map<String, List<core.MenuItem>> _groupByCategory(List<core.MenuItem> items) {
     final grouped = <String, List<core.MenuItem>>{};
     for (final item in items) {
       grouped.putIfAbsent(item.category, () => []).add(item);
@@ -109,8 +107,22 @@ class _ItemBrowser extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
     if (state.status == OrderStatus.failure) {
+      // WatchMenuStarted's emit.forEach subscription ends once it emits an
+      // error, so redispatching the event (rather than anything implicit)
+      // is what re-subscribes to watchMenu() and gives this a way back.
       return Center(
-        child: Text(state.failure?.message ?? 'Failed to load menu.'),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(state.failure?.message ?? 'Failed to load menu.'),
+            const Gap(12),
+            PrimaryButton(
+              onPressed: () =>
+                  context.read<OrderBloc>().add(const WatchMenuStarted()),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
       );
     }
 

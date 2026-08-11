@@ -67,15 +67,21 @@ class CartPanel extends StatelessWidget {
                           for (final line in state.cart)
                             CartLineTile(
                               line: line,
-                              onIncrement: () => context.read<OrderBloc>().add(
-                                AddToCart(line.menuItemId),
-                              ),
-                              onDecrement: () => context.read<OrderBloc>().add(
-                                DecrementCartLine(line.menuItemId),
-                              ),
-                              onRemove: () => context.read<OrderBloc>().add(
-                                RemoveCartLine(line.menuItemId),
-                              ),
+                              onIncrement: state.isCheckingOut
+                                  ? null
+                                  : () => context.read<OrderBloc>().add(
+                                      AddToCart(line.menuItemId),
+                                    ),
+                              onDecrement: state.isCheckingOut
+                                  ? null
+                                  : () => context.read<OrderBloc>().add(
+                                      DecrementCartLine(line.menuItemId),
+                                    ),
+                              onRemove: state.isCheckingOut
+                                  ? null
+                                  : () => context.read<OrderBloc>().add(
+                                      RemoveCartLine(line.menuItemId),
+                                    ),
                             ),
                         ],
                       ),
@@ -102,7 +108,9 @@ class CartPanel extends StatelessWidget {
                 onPressed: (state.cart.isEmpty || state.isCheckingOut)
                     ? null
                     : () => _checkout(context),
-                child: Text(state.isCheckingOut ? 'Placing order…' : 'Checkout'),
+                child: Text(
+                  state.isCheckingOut ? 'Placing order…' : 'Checkout',
+                ),
               ),
             ],
           ),

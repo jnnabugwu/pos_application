@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +9,6 @@ import '../../features/order/presentation/bloc/order_event.dart';
 import '../../features/order/presentation/view/order_page.dart';
 import '../di/injection.dart';
 import 'app_routes.dart';
-import 'auth_listenable.dart';
 
 /// Pure redirect decision, kept separate from [GoRouter] so it's unit
 /// testable without a BuildContext/GoRouterState.

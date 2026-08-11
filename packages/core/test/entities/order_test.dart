@@ -44,7 +44,8 @@ void main() {
       final looseMap = {
         ...map,
         'lineItems': [
-          for (final line in lineItems) Map<Object?, Object?>.from(line.toMap()),
+          for (final line in lineItems)
+            Map<Object?, Object?>.from(line.toMap()),
         ],
       };
       expect(Order.fromMap('order-1', looseMap), order);

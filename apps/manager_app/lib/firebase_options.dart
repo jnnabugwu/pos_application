@@ -14,44 +14,30 @@ import 'package:flutter/foundation.dart'
 ///   options: DefaultFirebaseOptions.currentPlatform,
 /// );
 /// ```
+// This app is scoped to iOS and Android only (phone + tablet/iPad) —
+// see README "Prerequisites". macOS/web/windows/linux are deliberately
+// unconfigured rather than left as dead FirebaseOptions blocks; re-run
+// `flutterfire configure` if a platform is ever added back.
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions are not configured for web — this app '
+        'targets iOS and Android only.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
         return ios;
-      case TargetPlatform.macOS:
-        return macos;
-      case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
-      case TargetPlatform.linux:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
       default:
         throw UnsupportedError(
-          'DefaultFirebaseOptions are not supported for this platform.',
+          'DefaultFirebaseOptions are not configured for '
+          '$defaultTargetPlatform — this app targets iOS and Android only.',
         );
     }
   }
-
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA2OMV7p6JMkQQBmG5pF504JC-FOTnu-o4',
-    appId: '1:591013084324:web:f074c7e9612ddf72c1fa31',
-    messagingSenderId: '591013084324',
-    projectId: 'pos-application-90299',
-    authDomain: 'pos-application-90299.firebaseapp.com',
-    storageBucket: 'pos-application-90299.firebasestorage.app',
-    measurementId: 'G-1K95VBX55L',
-  );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCh6H8IA1Xgj0VAEIIleKNT_9Bl2Dk4cXw',
@@ -62,15 +48,6 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAjTQYBV1ps-wtXpbis0ycuNZZt7jDFoxQ',
-    appId: '1:591013084324:ios:7a695479aba80ce5c1fa31',
-    messagingSenderId: '591013084324',
-    projectId: 'pos-application-90299',
-    storageBucket: 'pos-application-90299.firebasestorage.app',
-    iosBundleId: 'com.example.managerApp',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAjTQYBV1ps-wtXpbis0ycuNZZt7jDFoxQ',
     appId: '1:591013084324:ios:7a695479aba80ce5c1fa31',
     messagingSenderId: '591013084324',

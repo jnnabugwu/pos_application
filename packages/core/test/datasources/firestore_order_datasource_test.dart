@@ -44,6 +44,7 @@ void main() {
         await seedMenuItem('item-2', stockCount: 5);
 
         final result = await datasource.createOrder(
+          requestId: 'req-1',
           lineItems: const [
             OrderLineItem(
               menuItemId: 'item-1',
@@ -74,9 +75,15 @@ void main() {
         expect(storedOrder.exists, true);
         expect(storedOrder.data()!['totalCents'], 1175);
 
-        final item1 = await firestore.collection('menuItems').doc('item-1').get();
+        final item1 = await firestore
+            .collection('menuItems')
+            .doc('item-1')
+            .get();
         expect(item1.data()!['stockCount'], 8);
-        final item2 = await firestore.collection('menuItems').doc('item-2').get();
+        final item2 = await firestore
+            .collection('menuItems')
+            .doc('item-2')
+            .get();
         expect(item2.data()!['stockCount'], 4);
       },
     );
@@ -85,6 +92,7 @@ void main() {
       await seedMenuItem('item-1', stockCount: 1);
 
       await datasource.createOrder(
+        requestId: 'req-1',
         lineItems: const [
           OrderLineItem(
             menuItemId: 'item-1',
@@ -101,37 +109,73 @@ void main() {
       expect(item1.data()!['stockCount'], 0);
     });
 
-    test(
-      'coalesces duplicate line items for the same menu item id',
-      () async {
-        await seedMenuItem('item-1', stockCount: 10);
+    test('retrying the same request id after it already committed does not '
+        'double-decrement stock or create a second order', () async {
+      await seedMenuItem('item-1', stockCount: 10);
+      const lineItems = [
+        OrderLineItem(
+          menuItemId: 'item-1',
+          name: 'Latte',
+          priceCents: 450,
+          quantity: 2,
+        ),
+      ];
 
+      final first = _asOrder(
         await datasource.createOrder(
-          lineItems: const [
-            OrderLineItem(
-              menuItemId: 'item-1',
-              name: 'Latte',
-              priceCents: 450,
-              quantity: 1,
-            ),
-            OrderLineItem(
-              menuItemId: 'item-1',
-              name: 'Latte',
-              priceCents: 450,
-              quantity: 2,
-            ),
-          ],
+          requestId: 'req-retry',
+          lineItems: lineItems,
           createdByUid: 'uid-1',
           createdByEmail: 'staff@pos.test',
-        );
+        ),
+      );
+      final retry = _asOrder(
+        await datasource.createOrder(
+          requestId: 'req-retry',
+          lineItems: lineItems,
+          createdByUid: 'uid-1',
+          createdByEmail: 'staff@pos.test',
+        ),
+      );
 
-        final item1 = await firestore.collection('menuItems').doc('item-1').get();
-        expect(item1.data()!['stockCount'], 7);
-      },
-    );
+      expect(retry.id, first.id);
+      expect(retry.totalCents, first.totalCents);
+      expect((await firestore.collection('orders').get()).docs, hasLength(1));
+
+      final item1 = await firestore.collection('menuItems').doc('item-1').get();
+      expect(item1.data()!['stockCount'], 8);
+    });
+
+    test('coalesces duplicate line items for the same menu item id', () async {
+      await seedMenuItem('item-1', stockCount: 10);
+
+      await datasource.createOrder(
+        requestId: 'req-1',
+        lineItems: const [
+          OrderLineItem(
+            menuItemId: 'item-1',
+            name: 'Latte',
+            priceCents: 450,
+            quantity: 1,
+          ),
+          OrderLineItem(
+            menuItemId: 'item-1',
+            name: 'Latte',
+            priceCents: 450,
+            quantity: 2,
+          ),
+        ],
+        createdByUid: 'uid-1',
+        createdByEmail: 'staff@pos.test',
+      );
+
+      final item1 = await firestore.collection('menuItems').doc('item-1').get();
+      expect(item1.data()!['stockCount'], 7);
+    });
 
     test('rejects an empty cart without touching Firestore', () async {
       final result = await datasource.createOrder(
+        requestId: 'req-1',
         lineItems: const [],
         createdByUid: 'uid-1',
         createdByEmail: 'staff@pos.test',
@@ -164,14 +208,14 @@ void main() {
       ).thenReturn(menuItemsCollection);
       when(() => firestore.collection('orders')).thenReturn(ordersCollection);
       when(() => menuItemsCollection.doc(any())).thenReturn(menuDocRef);
-      when(() => ordersCollection.doc()).thenReturn(orderDocRef);
+      when(() => ordersCollection.doc(any())).thenReturn(orderDocRef);
       when(() => orderDocRef.id).thenReturn('mock-order-id');
     });
 
     test(
       'maps a FirebaseException thrown mid-transaction to a typed Failure',
       () async {
-        when(() => firestore.runTransaction<void>(any())).thenThrow(
+        when(() => firestore.runTransaction<Order>(any())).thenThrow(
           FirebaseException(
             plugin: 'cloud_firestore',
             code: 'permission-denied',
@@ -179,6 +223,7 @@ void main() {
         );
 
         final result = await datasource.createOrder(
+          requestId: 'req-1',
           lineItems: const [
             OrderLineItem(
               menuItemId: 'item-1',
@@ -197,10 +242,11 @@ void main() {
 
     test('maps a non-Firebase error to UnknownFailure', () async {
       when(
-        () => firestore.runTransaction<void>(any()),
+        () => firestore.runTransaction<Order>(any()),
       ).thenThrow(StateError('boom'));
 
       final result = await datasource.createOrder(
+        requestId: 'req-1',
         lineItems: const [
           OrderLineItem(
             menuItemId: 'item-1',

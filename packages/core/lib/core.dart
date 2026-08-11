@@ -8,6 +8,8 @@ export 'blocs/auth/auth_state.dart';
 
 export 'di/register_core_dependencies.dart';
 
+export 'router/auth_listenable.dart';
+
 export 'entities/app_role.dart';
 export 'entities/app_user.dart';
 export 'entities/menu_item.dart';

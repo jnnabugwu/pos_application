@@ -12,9 +12,9 @@ class CartLineTile extends StatelessWidget {
   });
 
   final CartLine line;
-  final VoidCallback onIncrement;
-  final VoidCallback onDecrement;
-  final VoidCallback onRemove;
+  final VoidCallback? onIncrement;
+  final VoidCallback? onDecrement;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {

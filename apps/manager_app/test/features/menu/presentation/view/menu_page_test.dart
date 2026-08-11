@@ -14,7 +14,11 @@ void main() {
   testWidgets('MenuPage shows a loading indicator before the menu loads', (
     tester,
   ) async {
-    final authBloc = core.AuthBloc(MockAuthRepository());
+    final authRepository = MockAuthRepository();
+    when(
+      () => authRepository.authStateChanges(),
+    ).thenAnswer((_) => const Stream.empty());
+    final authBloc = core.AuthBloc(authRepository);
     addTearDown(authBloc.close);
     final menuBloc = MenuBloc(MockMenuRepository());
     addTearDown(menuBloc.close);
@@ -65,7 +69,11 @@ void main() {
       () => menuRepository.watchMenu(),
     ).thenAnswer((_) => Stream.value([coffee, bagel]));
 
-    final authBloc = core.AuthBloc(MockAuthRepository());
+    final authRepository = MockAuthRepository();
+    when(
+      () => authRepository.authStateChanges(),
+    ).thenAnswer((_) => const Stream.empty());
+    final authBloc = core.AuthBloc(authRepository);
     addTearDown(authBloc.close);
     final menuBloc = MenuBloc(menuRepository);
     addTearDown(menuBloc.close);

@@ -18,6 +18,11 @@ void main() {
 
   setUp(() {
     authRepository = MockAuthRepository();
+    // AuthBloc subscribes to this in its constructor; tests that care about
+    // a specific emission override this stub themselves.
+    when(
+      () => authRepository.authStateChanges(),
+    ).thenAnswer((_) => const Stream.empty());
   });
 
   group('AuthBloc', () {
@@ -148,6 +153,31 @@ void main() {
           failure: InvalidCredentialsFailure('Bad credentials.'),
         ),
       ],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'resolves a restored session from authStateChanges() without an '
+      'explicit SignInRequested',
+      setUp: () {
+        when(
+          () => authRepository.authStateChanges(),
+        ).thenAnswer((_) => Stream.value(user));
+      },
+      build: () => AuthBloc(authRepository),
+      expect: () => [const AuthState(status: AuthStatus.success, user: user)],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'clears the user when authStateChanges() emits null (signed out '
+      'from outside this bloc)',
+      setUp: () {
+        when(
+          () => authRepository.authStateChanges(),
+        ).thenAnswer((_) => Stream.value(null));
+      },
+      build: () => AuthBloc(authRepository),
+      seed: () => const AuthState(status: AuthStatus.success, user: user),
+      expect: () => [const AuthState()],
     );
   });
 }

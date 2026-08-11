@@ -12,6 +12,9 @@ void main() {
     tester,
   ) async {
     final authRepository = MockAuthRepository();
+    when(
+      () => authRepository.authStateChanges(),
+    ).thenAnswer((_) => const Stream.empty());
     final bloc = AuthBloc(authRepository);
     addTearDown(bloc.close);
 
@@ -32,6 +35,9 @@ void main() {
     'shows a validation message and does not call signIn when fields are empty',
     (tester) async {
       final authRepository = MockAuthRepository();
+      when(
+        () => authRepository.authStateChanges(),
+      ).thenAnswer((_) => const Stream.empty());
       final bloc = AuthBloc(authRepository);
       addTearDown(bloc.close);
 

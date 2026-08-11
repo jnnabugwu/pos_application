@@ -24,9 +24,11 @@ class _LoginPageState extends State<LoginPage> {
 
   void _submit() {
     final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
+    // Not trimmed: a password's leading/trailing whitespace is part of the
+    // credential Firebase Auth checks against, unlike an email address.
+    final password = _passwordController.text;
 
-    if (email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.trim().isEmpty) {
       setState(() => _validationError = 'Enter both email and password.');
       return;
     }

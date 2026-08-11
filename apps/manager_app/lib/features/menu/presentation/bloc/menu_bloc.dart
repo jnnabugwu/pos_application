@@ -8,9 +8,6 @@ class MenuBloc extends Bloc<MenuEvent, MenuState> {
   MenuBloc(this._menuRepository) : super(const MenuState()) {
     on<WatchMenuStarted>(_onWatchMenuStarted);
     on<ToggleAvailability>(_onToggleAvailability);
-    on<CreateItemRequested>(_onCreateItemRequested);
-    on<UpdateItemRequested>(_onUpdateItemRequested);
-    on<DeleteItemRequested>(_onDeleteItemRequested);
   }
 
   final MenuRepository _menuRepository;
@@ -59,44 +56,6 @@ class MenuBloc extends Bloc<MenuEvent, MenuState> {
           failure: failure,
         ),
       ),
-      (_) {},
-    );
-  }
-
-  Future<void> _onCreateItemRequested(
-    CreateItemRequested event,
-    Emitter<MenuState> emit,
-  ) async {
-    final result = await _menuRepository.createItem(
-      name: event.name,
-      priceCents: event.priceCents,
-      category: event.category,
-      stockCount: event.stockCount,
-    );
-    result.fold(
-      (failure) => emit(state.copyWith(failure: failure)),
-      (_) {},
-    );
-  }
-
-  Future<void> _onUpdateItemRequested(
-    UpdateItemRequested event,
-    Emitter<MenuState> emit,
-  ) async {
-    final result = await _menuRepository.updateItem(event.item);
-    result.fold(
-      (failure) => emit(state.copyWith(failure: failure)),
-      (_) {},
-    );
-  }
-
-  Future<void> _onDeleteItemRequested(
-    DeleteItemRequested event,
-    Emitter<MenuState> emit,
-  ) async {
-    final result = await _menuRepository.deleteItem(event.itemId);
-    result.fold(
-      (failure) => emit(state.copyWith(failure: failure)),
       (_) {},
     );
   }

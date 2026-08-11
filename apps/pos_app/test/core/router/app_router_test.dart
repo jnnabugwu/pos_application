@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pos_app/core/router/app_router.dart';
 import 'package:pos_app/core/router/app_routes.dart';
-import 'package:pos_app/core/router/auth_listenable.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../support/fake_auth_repository.dart';

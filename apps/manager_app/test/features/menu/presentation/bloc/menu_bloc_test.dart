@@ -24,10 +24,6 @@ void main() {
     updatedAt: now,
   );
 
-  setUpAll(() {
-    registerFallbackValue(item);
-  });
-
   setUp(() {
     menuRepository = MockMenuRepository();
   });
@@ -133,125 +129,6 @@ void main() {
         verify(() => menuRepository.setAvailability('item1', false)).called(1);
         verify(() => menuRepository.setAvailability('item1', true)).called(1);
       },
-    );
-
-    blocTest<MenuBloc, MenuState>(
-      'CreateItemRequested calls createItem and is a no-op on success',
-      setUp: () {
-        when(
-          () => menuRepository.createItem(
-            name: any(named: 'name'),
-            priceCents: any(named: 'priceCents'),
-            category: any(named: 'category'),
-            stockCount: any(named: 'stockCount'),
-          ),
-        ).thenAnswer((_) async => Right(item));
-      },
-      build: () => MenuBloc(menuRepository),
-      act: (bloc) => bloc.add(
-        const CreateItemRequested(
-          name: 'Bagel',
-          priceCents: 275,
-          category: 'Food',
-          stockCount: 10,
-        ),
-      ),
-      expect: () => <MenuState>[],
-      verify: (_) {
-        verify(
-          () => menuRepository.createItem(
-            name: 'Bagel',
-            priceCents: 275,
-            category: 'Food',
-            stockCount: 10,
-          ),
-        ).called(1);
-      },
-    );
-
-    blocTest<MenuBloc, MenuState>(
-      'CreateItemRequested surfaces a failure',
-      setUp: () {
-        when(
-          () => menuRepository.createItem(
-            name: any(named: 'name'),
-            priceCents: any(named: 'priceCents'),
-            category: any(named: 'category'),
-            stockCount: any(named: 'stockCount'),
-          ),
-        ).thenAnswer((_) async => const Left(PermissionFailure()));
-      },
-      build: () => MenuBloc(menuRepository),
-      act: (bloc) => bloc.add(
-        const CreateItemRequested(
-          name: 'Bagel',
-          priceCents: 275,
-          category: 'Food',
-          stockCount: 10,
-        ),
-      ),
-      expect: () => [
-        const MenuState(failure: PermissionFailure()),
-      ],
-    );
-
-    blocTest<MenuBloc, MenuState>(
-      'UpdateItemRequested calls updateItem with the given item',
-      setUp: () {
-        when(
-          () => menuRepository.updateItem(any()),
-        ).thenAnswer((_) async => const Right(unit));
-      },
-      build: () => MenuBloc(menuRepository),
-      act: (bloc) => bloc.add(UpdateItemRequested(item.copyWith(name: 'Mocha'))),
-      expect: () => <MenuState>[],
-      verify: (_) {
-        verify(() => menuRepository.updateItem(item.copyWith(name: 'Mocha')))
-            .called(1);
-      },
-    );
-
-    blocTest<MenuBloc, MenuState>(
-      'UpdateItemRequested surfaces a failure',
-      setUp: () {
-        when(
-          () => menuRepository.updateItem(any()),
-        ).thenAnswer((_) async => const Left(NetworkFailure()));
-      },
-      build: () => MenuBloc(menuRepository),
-      act: (bloc) => bloc.add(UpdateItemRequested(item)),
-      expect: () => [
-        const MenuState(failure: NetworkFailure()),
-      ],
-    );
-
-    blocTest<MenuBloc, MenuState>(
-      'DeleteItemRequested calls deleteItem with the given id',
-      setUp: () {
-        when(
-          () => menuRepository.deleteItem(any()),
-        ).thenAnswer((_) async => const Right(unit));
-      },
-      build: () => MenuBloc(menuRepository),
-      act: (bloc) => bloc.add(const DeleteItemRequested('item1')),
-      expect: () => <MenuState>[],
-      verify: (_) {
-        verify(() => menuRepository.deleteItem('item1')).called(1);
-      },
-    );
-
-    blocTest<MenuBloc, MenuState>(
-      'DeleteItemRequested surfaces a failure',
-      setUp: () {
-        when(
-          () => menuRepository.deleteItem(any()),
-        ).thenAnswer((_) async => const Left(PermissionFailure()));
-      },
-      build: () => MenuBloc(menuRepository),
-      act: (bloc) => bloc.add(const DeleteItemRequested('item1')),
-      expect: () => [
-        const MenuState(failure: PermissionFailure()),
-      ],
     );
   });
 }
